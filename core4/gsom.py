@@ -4,6 +4,7 @@ import copy
 import time
 
 import scipy
+import pandas as pd
 from tqdm import tqdm
 from core4 import growth_handler as Growth_Handler
 from core4 import elements as Elements
@@ -166,39 +167,37 @@ class GSOM:
                 count_1 = 0
 
                 labels = value.get_mapped_labels()
-                f_label = max(set(labels), key=labels.count)
-                self.gsom_nodemap[key].change_label(f_label)
 
-                # for label in labels:
-                #     if label == '1':
-                #         count_1 += 1
-                #     if label == '0':
-                #         count_0 += 1
-                # if count_1 > count_0:
-                #     self.gsom_nodemap[key].change_label('1')
-                #     # self.node_labels.loc[index, "Name"] = '1'
-                # elif count_0 > count_1:
-                #     # self.node_labels.loc[index, "Name"] = '0'
-                #     self.gsom_nodemap[key].change_label('0')
-                #
-                # else:
-                #     # cripkeu=np.empty((len(value.get_mapped_labels_indexes()),55))
-                #     X_weights=[]
-                #     label_indexes = value.get_mapped_labels_indexes()
-                #     for i in label_indexes:
-                #         X_weight=self.inputs[i,:]
-                #         # np.append(cripkeu,sdgg,axis=0)
-                #         X_weights.append(X_weight)
-                #     X_weights = np.asarray(X_weights)
-                #     neutral_node=value.recurrent_weights.reshape(1,value.dimensions)
-                #     out = scipy.spatial.distance.cdist(X_weights,neutral_node , 'euclidean')
-                #
-                #     nearest_index = out.argmin()
-                #     nearest_neighbor_index = label_indexes[nearest_index]
-                #     nearest_neighbor = self.activity_classes[nearest_neighbor_index]
-                #
-                #     self.gsom_nodemap[key].change_label(nearest_neighbor)
-                #     # neutral_indexes.append(key)
+                # f_label = max(set(labels), key=labels.count)
+                df = pd.DataFrame({'Number': labels})
+                # df = df.astype('int32')
+                hello = df['Number'].value_counts()
+                max_occurances = df['Number'].mode()
+
+
+
+                if(len(max_occurances)==1):
+                    f_label = max_occurances[0]
+                    self.gsom_nodemap[key].change_label(f_label)
+
+                else:
+                    # cripkeu=np.empty((len(value.get_mapped_labels_indexes()),55))
+                    X_weights=[]
+                    label_indexes = value.get_mapped_labels_indexes()
+                    for i in label_indexes:
+                        X_weight=self.inputs[i,:]
+                        # np.append(cripkeu,sdgg,axis=0)
+                        X_weights.append(X_weight)
+                    X_weights = np.asarray(X_weights)
+                    neutral_node=value.recurrent_weights.reshape(1,value.dimensions)
+                    out = scipy.spatial.distance.cdist(X_weights,neutral_node , 'euclidean')
+
+                    nearest_index = out.argmin()
+                    nearest_neighbor_index = label_indexes[nearest_index]
+                    nearest_neighbor = self.activity_classes[nearest_neighbor_index]
+
+                    self.gsom_nodemap[key].change_label(nearest_neighbor)
+                    # neutral_indexes.append(key)
             else:
                 removable_indexes.append(key)
         # print(neutral_indexes)
