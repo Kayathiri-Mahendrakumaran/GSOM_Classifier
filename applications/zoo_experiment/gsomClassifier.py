@@ -5,8 +5,11 @@ from os.path import join
 from datetime import datetime
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import confusion_matrix
+from sklearn.preprocessing import MinMaxScaler
+
 sys.path.append('../../')
 
+import numpy as np
 import data_parser as Parser
 from util import utilities as Utils
 from util import display as Display_Utils
@@ -116,19 +119,34 @@ class GSOMClassifier():
 
         print('Completed.')
 
-data_filename = "data/featuresdata.csv".replace('\\', '/')
-X, y = Parser.InputParser.parse_input_zoo_data(data_filename)
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
+X_train = np.load('data/casme_train1.npy')
+y_train = np.load('data/casme_trainlabel1.npy')
+# X_train = np.load('data/casme_test1.npy')
+# y_train = np.load('data/casme_testlabel1.npy')
+X_test = np.load('data/casme_test1.npy')
+y_test = np.load('data/casme_testlabel1.npy')
+
+scaler = MinMaxScaler()
+X_train = scaler.fit_transform(X_train)
+
 gsom = GSOMClassifier()
+
 result_dict, classes = gsom.fit(X_train, y_train)
+
 gsom.dispaly(result_dict, classes)
+
 y_pred = gsom.predict(X_test)
+
 print(y_pred)
 print(y_test)
+
 mat = confusion_matrix(y_test, y_pred)
 print (mat)
+
+
 k = 0
 for i in range (len(mat)):
     k = k + mat[i][i]
 acc = k/len(y_test)*100
+
 print("Accuracy  :   ", acc)
